@@ -1,55 +1,30 @@
-# Prerequisites
-*.d
+# Created by https://www.toptal.com/developers/gitignore/api/windows
+# Edit at https://www.toptal.com/developers/gitignore?templates=windows
 
-# Object files
-*.o
-*.ko
-*.obj
-*.elf
+### Windows ###
+# Windows thumbnail cache files
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
 
-# Linker output
-*.ilk
-*.map
-*.exp
+# Dump file
+*.stackdump
 
-# Precompiled Headers
-*.gch
-*.pch
+# Folder config file
+[Dd]esktop.ini
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
 
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
+# Windows Installer files
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
 
-# Executables
-*.exe
-*.out
-*.app
-*.i*86
-*.x86_64
-*.hex
+# Windows shortcuts
+*.lnk
 
-# Debug files
-*.dSYM/
-*.su
-*.idb
-*.pdb
-
-# Kernel Module Compile Results
-*.mod*
-*.cmd
-.tmp_versions/
-modules.order
-Module.symvers
-Mkfile.old
-dkms.conf
-
-# debug information files
-*.dwo
+# End of https://www.toptal.com/developers/gitignore/api/windows
