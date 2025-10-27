@@ -57,6 +57,8 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Warm_Hum_Pin GPIO_PIN_4
+#define Warm_Hum_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
