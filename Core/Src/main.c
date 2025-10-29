@@ -60,8 +60,9 @@ static void MX_USART3_UART_Init(void);
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
 #include <string.h>
-#include "I2C_LCD.h"
+#include <i2c_lcd.h>
 
+#include "display.h"
 /* USER CODE END 0 */
 
 /**
@@ -106,11 +107,8 @@ int main(void)
   lcd_backlight(1);
 
   // "Hello World" 출력
-  lcd_set_cursor(0, 0);  // 1번째 줄, 첫 번째 칸
-  lcd_print("Hello World!");
 
-  lcd_set_cursor(0, 1);  // 2번째 줄, 첫 번째 칸
-  lcd_print("STM32F429");
+  init_display();
 
   /* USER CODE END 2 */
 
@@ -118,6 +116,8 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  show_next_page();
+	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */

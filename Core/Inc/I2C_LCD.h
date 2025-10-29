@@ -51,5 +51,8 @@ void lcd_clear(void);
 void lcd_set_cursor(uint8_t col, uint8_t row);
 void lcd_print(char *str);
 void lcd_backlight(uint8_t state);
+void lcd_create_char(uint8_t location, uint8_t charmap[8]);
+void lcd_write_custom_char(uint8_t location);
+
 
 #endif /* I2C_LCD_H_ */

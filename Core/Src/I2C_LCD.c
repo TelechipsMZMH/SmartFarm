@@ -1,17 +1,43 @@
 /* i2c_lcd.c */
-#include "i2c_lcd.h"
+#include <i2c_lcd.h>
 
 static I2C_HandleTypeDef *lcd_i2c;
 static uint8_t backlight_state = LCD_BACKLIGHT;
 
+/* i2c_lcd.c */
+
+/* 커스텀 문자 생성 함수 */
+void lcd_create_char(uint8_t location, uint8_t charmap[8])
+{
+    location &= 0x07;  // 0~7만 가능
+
+    /* CGRAM 주소 설정 */
+    lcd_send_cmd(0x40 | (location << 3));
+
+    /* 8바이트 패턴 전송 */
+    for(uint8_t i = 0; i < 8; i++)
+    {
+        lcd_send_data(charmap[i]);
+    }
+
+    /* 다시 DDRAM으로 복귀 */
+    lcd_send_cmd(0x80);
+}
+
+/* 커스텀 문자 출력 */
+void lcd_write_custom_char(uint8_t location)
+{
+    lcd_send_data(location & 0x07);
+}
+
 /* Low-level 함수: I2C로 바이트 전송 */
-static void lcd_send_byte(uint8_t data)
+void lcd_send_byte(uint8_t data)
 {
     HAL_I2C_Master_Transmit(lcd_i2c, LCD_ADDR, &data, 1, 100);
 }
 
 /* 4bit 모드로 상위/하위 니블 전송 */
-static void lcd_send_nibble(uint8_t nibble)
+void lcd_send_nibble(uint8_t nibble)
 {
     uint8_t data = nibble | backlight_state;
 
@@ -25,7 +51,7 @@ static void lcd_send_nibble(uint8_t nibble)
 }
 
 /* 명령어 전송 (RS=0) */
-static void lcd_send_cmd(uint8_t cmd)
+void lcd_send_cmd(uint8_t cmd)
 {
     uint8_t upper_nibble = (cmd & 0xF0);
     uint8_t lower_nibble = ((cmd << 4) & 0xF0);
@@ -35,7 +61,7 @@ static void lcd_send_cmd(uint8_t cmd)
 }
 
 /* 데이터 전송 (RS=1) */
-static void lcd_send_data(uint8_t data)
+void lcd_send_data(uint8_t data)
 {
     uint8_t upper_nibble = (data & 0xF0) | Rs;
     uint8_t lower_nibble = ((data << 4) & 0xF0) | Rs;
