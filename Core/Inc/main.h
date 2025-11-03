@@ -59,6 +59,10 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Warm_Hum_Pin GPIO_PIN_4
 #define Warm_Hum_GPIO_Port GPIOD
+#define FAN_Motor_Pin GPIO_PIN_5
+#define FAN_Motor_GPIO_Port GPIOD
+#define HeatingPad_Pin GPIO_PIN_6
+#define HeatingPad_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 

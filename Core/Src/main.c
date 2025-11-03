@@ -2,28 +2,17 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2024 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
+  * @brief          : 릴레이 모듈 LED 테스트 프로그램
   ******************************************************************************
   */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include "string.h"
-#include <stdio.h>
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "WarmHum.h"
+#include "temp_control.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,7 +34,6 @@
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
-uint8_t RHI, RHD, TCI, TCD, SUM;
 float temperature = 0;
 float humidity = 0;
 char msg[200];
@@ -56,13 +44,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
-void DHT11_Start(void);
-uint8_t DHT11_Check_Response(void);
-uint8_t DHT11_Read_Byte(void);
-void DHT11_Read_Data(void);
-void Set_Pin_Output(void);
-void Set_Pin_Input(void);
-void delay_us(uint32_t us);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -78,7 +60,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  uint8_t read_result;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -101,8 +83,16 @@ int main(void)
   MX_GPIO_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-  snprintf(msg, sizeof(msg), "\r\n===== DHT11 Temperature Sensor =====\r\n");
+
+  // 모듈 초기화
+  DHT11_Init();
+  TempControl_Init();
+
+  snprintf(msg, sizeof(msg), "\r\n===== Temperature Control System =====\r\n");
   HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+  snprintf(msg, sizeof(msg), "Fan ON: > 30C, Heater ON: <= 10C\r\n\r\n");
+  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+
   HAL_Delay(2000);  // DHT11 초기화 대기
   /* USER CODE END 2 */
 
@@ -110,13 +100,24 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    DHT11_Read_Data();
+    // DHT11 센서로부터 데이터 읽기
+    read_result = DHT11_Read_Data(&temperature, &humidity);
 
-    snprintf(msg, sizeof(msg), "Temperature: %.1f C\r\n", temperature);
-    HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+    if (read_result)
+    {
+      // 온도/습도 출력
+      snprintf(msg, sizeof(msg), "Temperature: %.1f C | Humidity: %.1f %%\r\n",
+               temperature, humidity);
+      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
 
-    snprintf(msg, sizeof(msg), "Humidity: %.1f %%\r\n\r\n", humidity);
-    HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+      // 온도 제어 업데이트 (팬 및 발열패드 제어)
+      TempControl_Update(temperature);
+    }
+    else
+    {
+      snprintf(msg, sizeof(msg), "DHT11 Read Error!\r\n");
+      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+    }
 
     HAL_Delay(3000);  // 3초마다 측정
     /* USER CODE END WHILE */
@@ -220,7 +221,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(Warm_Hum_GPIO_Port, Warm_Hum_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOD, Warm_Hum_Pin|FAN_Motor_Pin|HeatingPad_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : Warm_Hum_Pin */
   GPIO_InitStruct.Pin = Warm_Hum_Pin;
@@ -229,156 +230,18 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
   HAL_GPIO_Init(Warm_Hum_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : FAN_Motor_Pin HeatingPad_Pin */
+  GPIO_InitStruct.Pin = FAN_Motor_Pin|HeatingPad_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
+
   /* USER CODE BEGIN MX_GPIO_Init_2 */
-  /* DWT를 사용한 마이크로초 딜레이를 위한 설정 */
-  CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
-  DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-  DWT->CYCCNT = 0;
   /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
-
-/**
-  * @brief  마이크로초 단위 딜레이 함수
-  * @param  us: 마이크로초
-  * @retval None
-  */
-void delay_us(uint32_t us)
-{
-  uint32_t start = DWT->CYCCNT;
-  uint32_t cycles = us * (SystemCoreClock / 1000000);
-  while ((DWT->CYCCNT - start) < cycles);
-}
-
-/**
-  * @brief  GPIO 핀을 출력 모드로 설정
-  * @param  None
-  * @retval None
-  */
-void Set_Pin_Output(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = Warm_Hum_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
-  HAL_GPIO_Init(Warm_Hum_GPIO_Port, &GPIO_InitStruct);
-}
-
-/**
-  * @brief  GPIO 핀을 입력 모드로 설정
-  * @param  None
-  * @retval None
-  */
-void Set_Pin_Input(void)
-{
-  GPIO_InitTypeDef GPIO_InitStruct = {0};
-  GPIO_InitStruct.Pin = Warm_Hum_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  HAL_GPIO_Init(Warm_Hum_GPIO_Port, &GPIO_InitStruct);
-}
-
-/**
-  * @brief  DHT11 시작 신호 전송
-  * @param  None
-  * @retval None
-  */
-void DHT11_Start(void)
-{
-  Set_Pin_Output();
-  HAL_GPIO_WritePin(Warm_Hum_GPIO_Port, Warm_Hum_Pin, GPIO_PIN_RESET);  // Low
-  HAL_Delay(18);  // 최소 18ms
-  HAL_GPIO_WritePin(Warm_Hum_GPIO_Port, Warm_Hum_Pin, GPIO_PIN_SET);    // High
-  delay_us(30);   // 20-40us 대기
-  Set_Pin_Input();
-}
-
-/**
-  * @brief  DHT11 응답 확인
-  * @param  None
-  * @retval 0: 응답 없음, 1: 응답 있음
-  */
-uint8_t DHT11_Check_Response(void)
-{
-  uint8_t response = 0;
-  delay_us(40);
-
-  if (!HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin))  // Low 확인
-  {
-    delay_us(80);
-    if (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin))  // High 확인
-      response = 1;
-    else
-      response = 0;
-  }
-
-  while (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin));  // High 종료 대기
-
-  return response;
-}
-
-/**
-  * @brief  DHT11에서 1바이트 읽기
-  * @param  None
-  * @retval 읽은 바이트 값
-  */
-uint8_t DHT11_Read_Byte(void)
-{
-  uint8_t i, byte = 0;
-
-  for (i = 0; i < 8; i++)
-  {
-    while (!HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin));  // Low 종료 대기
-    delay_us(40);  // 40us 대기
-
-    if (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin))  // 여전히 High면 '1'
-    {
-      byte |= (1 << (7 - i));
-    }
-
-    while (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin));  // High 종료 대기
-  }
-
-  return byte;
-}
-
-/**
-  * @brief  DHT11 데이터 읽기 및 온습도 계산
-  * @param  None
-  * @retval None
-  */
-void DHT11_Read_Data(void)
-{
-  DHT11_Start();
-
-  if (DHT11_Check_Response())
-  {
-    RHI = DHT11_Read_Byte();  // 습도 정수부
-    RHD = DHT11_Read_Byte();  // 습도 소수부
-    TCI = DHT11_Read_Byte();  // 온도 정수부
-    TCD = DHT11_Read_Byte();  // 온도 소수부
-    SUM = DHT11_Read_Byte();  // 체크섬
-
-    // 체크섬 검증
-    if (SUM == (RHI + RHD + TCI + TCD))
-    {
-      temperature = (float)TCI + (float)TCD / 10.0;
-      humidity = (float)RHI + (float)RHD / 10.0;
-    }
-    else
-    {
-      snprintf(msg, sizeof(msg), "Checksum Error!\r\n");
-      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
-    }
-  }
-  else
-  {
-    snprintf(msg, sizeof(msg), "DHT11 No Response!\r\n");
-    HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
-  }
-}
 
 /* USER CODE END 4 */
 
