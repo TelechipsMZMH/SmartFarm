@@ -21,18 +21,19 @@ uint8_t black_box[8] = {
 
 void init_display(void)
 {
-	info.humid_integer = 25;
-	info.humid_decimal = 7;
-	info.temp_integer = 65;
-	info.temp_decimal = 3;
-	info.soil_moisture = 5;
+	info.humid_integer = 00;
+	info.humid_decimal = 0;
+	info.temp_integer = 00;
+	info.temp_decimal = 0;
+	info.soil_moisture = 0;
 	info.is_fan_on = false;
-	info.is_heat_on = true;
+	info.is_heat_on = false;
 	info.is_light_on = false;
 
 	info.page_no = Display_Page_No_2;
 	lcd_create_char(1, empty_box);
 	lcd_create_char(2, black_box);
+
 //	HAL_Delay(100);
 //	lcd_init(&hi2c1);
 //	lcd_backlight(1);

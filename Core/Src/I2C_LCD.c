@@ -127,8 +127,7 @@ void lcd_set_cursor(uint8_t col, uint8_t row)
 /* 문자열 출력 */
 void lcd_print(char *str)
 {
-    while(*str)
-    {
+    while(*str) {
         lcd_send_data(*str++);
     }
 }
@@ -136,10 +135,12 @@ void lcd_print(char *str)
 /* 백라이트 제어 */
 void lcd_backlight(uint8_t state)
 {
-    if(state)
+    if(state) {
         backlight_state = LCD_BACKLIGHT;
-    else
+    }
+    else {
         backlight_state = LCD_NOBACKLIGHT;
+    }
 
     lcd_send_byte(backlight_state);
 }

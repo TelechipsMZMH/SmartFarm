@@ -36,6 +36,7 @@ typedef struct {
 
 
 void init_display(void);
+
 void set_display_temp(uint8_t temp_int, uint8_t temp_dec);
 
 void set_display_humid(uint8_t humid_int, uint8_t humid_dec);
