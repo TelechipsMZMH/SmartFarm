@@ -93,10 +93,12 @@ uint8_t DHT11_Check_Response(void)
   if (!HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin))  // Low 확인
   {
     delay_us(80);
-    if (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin))  // High 확인
+    if (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin)) { // High 확인
       response = 1;
-    else
+    }
+    else {
       response = 0;
+    }
   }
 
   while (HAL_GPIO_ReadPin(Warm_Hum_GPIO_Port, Warm_Hum_Pin));  // High 종료 대기
