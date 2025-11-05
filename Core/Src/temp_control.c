@@ -33,8 +33,8 @@ void TempControl_Init(void)
   */
 void TempControl_Update(float temperature)
 {
-  // 팬 제어: 30도 초과 시 ON, 이하 시 OFF
-  if (temperature > TEMP_HIGH_THRESHOLD)
+  // 팬 제어: 30도 이상 시 ON, 이하 시 OFF
+  if (temperature >= TEMP_HIGH_THRESHOLD)
   {
     if (!fan_state)
     {
