@@ -113,7 +113,8 @@ uint8_t DHT11_Check_Response(void)
   */
 uint8_t DHT11_Read_Byte(void)
 {
-  uint8_t i, byte = 0;
+  uint8_t i;
+  uint8_t byte = 0;
 
   for (i = 0; i < 8; i++)
   {
