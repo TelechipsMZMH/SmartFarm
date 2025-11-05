@@ -11,7 +11,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "WarmHum.h"
+#include "warm_hum.h"
 #include "temp_control.h"
 /* USER CODE END Includes */
 
@@ -36,7 +36,7 @@ UART_HandleTypeDef huart3;
 /* USER CODE BEGIN PV */
 float temperature = 0;
 float humidity = 0;
-char msg[200];
+uint8_t msg[200];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/

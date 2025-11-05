@@ -6,7 +6,7 @@
  */
 
 
-#include "WarmHum.h"
+#include "warm_hum.h"
 
 /* Private variables */
 static uint8_t RHI, RHD, TCI, TCD, SUM;
