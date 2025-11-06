@@ -13,6 +13,7 @@
 /* USER CODE BEGIN Includes */
 #include "warm_hum.h"
 #include "temp_control.h"
+#include <stdarg.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -159,17 +160,17 @@ int main(void)
     if (read_result)
     {
       // 온도/습도 출력
-      snprintf(msg, sizeof(msg), "Temperature: %.1f C | Humidity: %.1f %%\r\n",
-               temperature, humidity);
-      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+//      snprintf(msg, sizeof(msg), "Temperature: %.1f C | Humidity: %.1f %%\r\n",
+//               temperature, humidity);
+//      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
 
       // 온도 제어 업데이트 (팬 및 발열패드 제어)
       TempControl_Update(temperature);
     }
     else
     {
-      snprintf(msg, sizeof(msg), "DHT11 Read Error!\r\n");
-      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+//      snprintf(msg, sizeof(msg), "DHT11 Read Error!\r\n");
+//      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
     }
 
     HAL_Delay(3000);  // 3초마다 측정

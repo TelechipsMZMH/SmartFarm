@@ -77,7 +77,7 @@ void TempControl_Update(float temperature)
   */
 void TempControl_FanOn(void)
 {
-  HAL_GPIO_WritePin(FAN_Motor_GPIO_Port, FAN_Motor_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(FAN_Moter_GPIO_Port, FAN_Moter_Pin, GPIO_PIN_SET);
 }
 
 /**
@@ -87,7 +87,7 @@ void TempControl_FanOn(void)
   */
 void TempControl_FanOff(void)
 {
-  HAL_GPIO_WritePin(FAN_Motor_GPIO_Port, FAN_Motor_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(FAN_Moter_GPIO_Port, FAN_Moter_Pin, GPIO_PIN_RESET);
 }
 
 /**
