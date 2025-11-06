@@ -2,17 +2,7 @@
 /**
   ******************************************************************************
   * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
-  *
+  * @brief          : 릴레이 모듈 LED 테스트 프로그램
   ******************************************************************************
   */
 /* USER CODE END Header */
@@ -21,7 +11,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "warm_hum.h"
+#include "temp_control.h"
+#include <stdarg.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -47,7 +39,9 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
-
+float temperature = 0;
+float humidity = 0;
+uint8_t msg[200];
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -112,7 +106,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-
+  uint8_t read_result;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -143,6 +137,16 @@ int main(void)
   // UART 인터럽트 수신 시작
   HAL_UART_Receive_IT(&huart3, &rx_data, 1);
 
+  // 모듈 초기화
+  DHT11_Init();
+  TempControl_Init();
+
+  snprintf(msg, sizeof(msg), "\r\n===== Temperature Control System =====\r\n");
+  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+  snprintf(msg, sizeof(msg), "Fan ON: > 30C, Heater ON: <= 10C\r\n\r\n");
+  HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+
+  HAL_Delay(2000);  // DHT11 초기화 대기
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -150,6 +154,26 @@ int main(void)
 
   while (1)
   {
+    // DHT11 센서로부터 데이터 읽기
+    read_result = DHT11_Read_Data(&temperature, &humidity);
+
+    if (read_result)
+    {
+      // 온도/습도 출력
+//      snprintf(msg, sizeof(msg), "Temperature: %.1f C | Humidity: %.1f %%\r\n",
+//               temperature, humidity);
+//      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+
+      // 온도 제어 업데이트 (팬 및 발열패드 제어)
+      TempControl_Update(temperature);
+    }
+    else
+    {
+//      snprintf(msg, sizeof(msg), "DHT11 Read Error!\r\n");
+//      HAL_UART_Transmit(&huart3, (uint8_t*)msg, strlen(msg), 1000);
+    }
+
+    HAL_Delay(3000);  // 3초마다 측정
       // ADC 조도센서 읽기
       HAL_ADC_Start(&hadc1);
       HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
@@ -203,7 +227,7 @@ void SystemClock_Config(void)
   /** Configure the main internal regulator output voltage
   */
   __HAL_RCC_PWR_CLK_ENABLE();
-  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
+  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the RCC Oscillators according to the specified parameters
   * in the RCC_OscInitTypeDef structure.
@@ -211,7 +235,12 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
-  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_NONE;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSI;
+  RCC_OscInitStruct.PLL.PLLM = 8;
+  RCC_OscInitStruct.PLL.PLLN = 168;
+  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
+  RCC_OscInitStruct.PLL.PLLQ = 4;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -221,12 +250,12 @@ void SystemClock_Config(void)
   */
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_5) != HAL_OK)
   {
     Error_Handler();
   }
