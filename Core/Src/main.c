@@ -18,8 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <string.h>
-#include <stdarg.h>
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -55,8 +54,8 @@ UART_HandleTypeDef huart3;
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_ADC1_Init(void);
-static void MX_USART3_UART_Init(void);
 static void MX_TIM3_Init(void);
+static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 #define THRESHOLD 2000  // 조도 임계값
 #define SERVO_0_DEG    500   // 0도 (0.5ms)
@@ -69,7 +68,6 @@ uint8_t rx_data;
 volatile uint8_t servo_flag = 0;
 volatile uint32_t servo_start_time = 0;
 /* USER CODE END PFP */
-
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
@@ -136,8 +134,8 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_ADC1_Init();
-  MX_USART3_UART_Init();
   MX_TIM3_Init();
+  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   Servo_SetAngle(90);  // 초기 위치 0도로 설정
@@ -186,9 +184,9 @@ int main(void)
     		  servo_flag = 0;      // 플래그 초기화
     		  }
       }
-      /* USER CODE END WHILE */
-      HAL_Delay(200);
-      /* USER CODE BEGIN 3 */
+    /* USER CODE END WHILE */
+
+    /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
 }
@@ -225,34 +223,13 @@ void SystemClock_Config(void)
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
-  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV4;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
 
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
-}
-
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if(huart->Instance == USART3)
-    {
-        if(rx_data == 'q' || rx_data == 'Q')
-        {
-            servo_flag = 1;  // 서보모터 동작 플래그 설정
-            servo_start_time = HAL_GetTick();  // 시작 시간 기록
-            Uart3_Printf("Servo rotate\n");
-        }
-        if(rx_data == 'r' || rx_data == 'R')
-        {
-             servo_flag = 2;  // 서보모터 동작 플래그 설정
-             servo_start_time = HAL_GetTick();  // 시작 시간 기록
-             Uart3_Printf("Servo rotate\n");
-        }
-        // 다음 수신을 위해 인터럽트 재시작
-        HAL_UART_Receive_IT(&huart3, &rx_data, 1);
-    }
 }
 
 /**
@@ -417,7 +394,24 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOD, Warm_Hum_Pin|FAN_Moter_Pin|HeatingPad_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : Warm_Hum_Pin */
+  GPIO_InitStruct.Pin = Warm_Hum_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_HIGH;
+  HAL_GPIO_Init(Warm_Hum_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : FAN_Moter_Pin HeatingPad_Pin */
+  GPIO_InitStruct.Pin = FAN_Moter_Pin|HeatingPad_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PB7 */
   GPIO_InitStruct.Pin = GPIO_PIN_7;
