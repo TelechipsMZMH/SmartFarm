@@ -5,6 +5,8 @@
  *      Author: mokta
  */
 
+#include "stm32f429xx.h"
+
 #include "display.h"
 #include "i2c_lcd.h"
 
@@ -19,7 +21,7 @@ uint8_t black_box[8] = {
 	0x00, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x1F, 0x00
 };
 
-void init_display(void)
+void init_display(I2C_HandleTypeDef *hi2c)
 {
 	info.humid_integer = 00;
 	info.humid_decimal = 0;
@@ -34,9 +36,9 @@ void init_display(void)
 	lcd_create_char(1, empty_box);
 	lcd_create_char(2, black_box);
 
-//	HAL_Delay(100);
-//	lcd_init(&hi2c1);
-//	lcd_backlight(1);
+	HAL_Delay(100);
+	lcd_init(hi2c);
+	lcd_backlight(1);
 }
 
 void set_display_temp(uint8_t temp_int, uint8_t temp_dec)
