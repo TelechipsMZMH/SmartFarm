@@ -49,6 +49,8 @@ extern "C" {
 
 /* USER CODE END EM */
 
+void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+
 /* Exported functions prototypes ---------------------------------------------*/
 void Error_Handler(void);
 
@@ -57,6 +59,12 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Warm_Hum_Pin GPIO_PIN_4
+#define Warm_Hum_GPIO_Port GPIOD
+#define FAN_Moter_Pin GPIO_PIN_5
+#define FAN_Moter_GPIO_Port GPIOD
+#define HeatingPad_Pin GPIO_PIN_6
+#define HeatingPad_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
