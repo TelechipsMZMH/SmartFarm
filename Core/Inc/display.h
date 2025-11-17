@@ -37,6 +37,8 @@ typedef struct {
 } Display_Info;
 
 
+
+
 void init_display(I2C_HandleTypeDef *hi2c);
 
 void set_display_temp(uint8_t temp_int, uint8_t temp_dec);
