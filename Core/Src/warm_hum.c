@@ -155,6 +155,9 @@ uint8_t DHT11_Read_Data(float *temp, float *humi)
     {
       *temp = (float)TCI + (float)TCD / 10.0;
       *humi = (float)RHI + (float)RHD / 10.0;
+
+  	set_display_temp(TCI, TCD);
+
       return 1;  // 성공
     }
     else
