@@ -41,7 +41,6 @@
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 
-I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
 TIM_HandleTypeDef htim3;
@@ -159,7 +158,7 @@ int main(void)
   // 모듈 초기화
   DHT11_Init();
   TempControl_Init();
-  init_display(&hi2c1);
+  init_display(&hi2c2);
 
   /* USER CODE END 2 */
 
@@ -180,56 +179,41 @@ int main(void)
     {
     }
 
-    HAL_Delay(3000);  // 3초마다 측정
-      // ADC 조도센서 읽기
-      HAL_ADC_Start(&hadc1);
-      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-      adc_value = HAL_ADC_GetValue(&hadc1);
-      voltage = (adc_value / 4095.0f) * 3.3f;
-      Uart3_Printf("bright: %d\n", adc_value);
-
-      // 조도에 따른 LED 제어
-      if(adc_value < THRESHOLD){
-          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1);
-      }
-      else{
-          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 0);
-      }
-
-      // 서보모터 제어 (인터럽트 플래그 확인)
-      if(servo_flag == 1){
-          if(HAL_GetTick() - servo_start_time < 1000){
-              Servo_SetAngle(0);  // 90도 회전
-          }
-          else{
-              Servo_SetAngle(90);   // 정지
-              servo_flag = 0;      // 플래그 초기화
-          }
-      }
-      if(servo_flag == 2){
-    	  if(HAL_GetTick() - servo_start_time < 1000){
-    		  Servo_SetAngle(180);  // 90도 회전
-    		  }
-    	  else{
-    		  Servo_SetAngle(90);   // 정지
-    		  servo_flag = 0;      // 플래그 초기화
-    		  }
-      }
-  	uint16_t moisture = SoilVal_Avg();
-  	// Water On
-  	// moisture Percentage 10% down
-  	if(moisture <= 10)
-  	{
-  		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
-  		HAL_Delay(500);
-  	}
-  		// Another Case
-  	else{ }
-
-  	printf("Moisture : %d%%\r\n",moisture);
-
-
-
+//    HAL_Delay(3000);  // 3초마다 측정
+//      // ADC 조도센서 읽기
+//      HAL_ADC_Start(&hadc1);
+//      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
+//      adc_value = HAL_ADC_GetValue(&hadc1);
+//      voltage = (adc_value / 4095.0f) * 3.3f;
+//      Uart3_Printf("bright: %d\n", adc_value);
+//
+//      // 조도에 따른 LED 제어
+//      if(adc_value < THRESHOLD){
+//          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1);
+//      }
+//      else{
+//          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 0);
+//      }
+//
+//      // 서보모터 제어 (인터럽트 플래그 확인)
+//      if(servo_flag == 1){
+//          if(HAL_GetTick() - servo_start_time < 1000){
+//              Servo_SetAngle(0);  // 90도 회전
+//          }
+//          else{
+//              Servo_SetAngle(90);   // 정지
+//              servo_flag = 0;      // 플래그 초기화
+//          }
+//      }
+//      if(servo_flag == 2){
+//    	  if(HAL_GetTick() - servo_start_time < 1000){
+//    		  Servo_SetAngle(180);  // 90도 회전
+//    		  }
+//    	  else{
+//    		  Servo_SetAngle(90);   // 정지
+//    		  servo_flag = 0;      // 플래그 초기화
+//    		  }
+//      }
 	  show_next_page();
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */

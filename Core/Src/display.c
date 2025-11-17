@@ -38,6 +38,7 @@ void init_display(I2C_HandleTypeDef *hi2c)
 	HAL_Delay(100);
 	lcd_init(hi2c);
 	lcd_backlight(1);
+
 	lcd_create_char(1, empty_box);
 	lcd_create_char(2, black_box);
 }
