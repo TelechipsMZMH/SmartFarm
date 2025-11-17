@@ -8,12 +8,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
+#include <stdio.h>
+#include <stdarg.h>
+#include "soil_hum.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "warm_hum.h"
 #include "temp_control.h"
 #include <stdarg.h>
+#define printf Uart3_Printf
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -205,6 +209,19 @@ int main(void)
 	  show_next_page();
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
+	uint16_t moisture = SoilVal_Avg();
+	// Water On
+	// moisture Percentage 10% down
+	if(moisture <= 10)
+	{
+		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
+		HAL_Delay(500);
+	}
+		// Another Case
+	else{ }
+
+	printf("Moisture : %d%%\r\n",moisture);
+	HAL_Delay(1000);
 
     /* USER CODE BEGIN 3 */
   }

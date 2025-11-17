@@ -65,6 +65,8 @@ void Error_Handler(void);
 #define FAN_Moter_GPIO_Port GPIOD
 #define HeatingPad_Pin GPIO_PIN_6
 #define HeatingPad_GPIO_Port GPIOD
+#define Water_MOT_Pin GPIO_PIN_3
+#define Water_MOT_GPIO_Port GPIOD
 
 /* USER CODE BEGIN Private defines */
 
