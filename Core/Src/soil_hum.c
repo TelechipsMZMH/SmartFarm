@@ -18,8 +18,8 @@
 
 void Soil_Start(void)
 {
-	HAL_ADC_Start(&hadc1);
-	HAL_ADC_PollForConversion(&hadc1, 100);
+	HAL_ADC_Start(&hadc2);
+	HAL_ADC_PollForConversion(&hadc2, 100);
 }
 
 /**
@@ -36,7 +36,7 @@ uint8_t SoilVal_Avg(void)
     for (int i = 0; i < Samples; i++)
     {
     	Soil_Start();
-        soil_val += HAL_ADC_GetValue(&hadc1);
+        soil_val += HAL_ADC_GetValue(&hadc2);
         HAL_Delay(100);
     }
 

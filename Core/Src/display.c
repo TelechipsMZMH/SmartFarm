@@ -33,12 +33,13 @@ void init_display(I2C_HandleTypeDef *hi2c)
 	info.is_light_on = false;
 
 	info.page_no = Display_Page_No_2;
-	lcd_create_char(1, empty_box);
-	lcd_create_char(2, black_box);
+
 
 	HAL_Delay(100);
 	lcd_init(hi2c);
 	lcd_backlight(1);
+	lcd_create_char(1, empty_box);
+	lcd_create_char(2, black_box);
 }
 
 void set_display_temp(uint8_t temp_int, uint8_t temp_dec)

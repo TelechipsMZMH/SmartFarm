@@ -8,7 +8,7 @@
 #ifndef INC_SOIL_HUM_H_
 #define INC_SOIL_HUM_H_
 
-extern ADC_HandleTypeDef hadc1;
+extern ADC_HandleTypeDef hadc2;
 void Soil_Start(void);
 uint8_t SoilVal_Avg(void);
 uint8_t Get_Percentage(uint16_t soil_adc);
