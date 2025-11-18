@@ -8,14 +8,16 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-#include <stdio.h>
-#include <stdarg.h>
-#include "soil_hum.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "warm_hum.h"
 #include "temp_control.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include "soil_hum.h"
+
 #define printf Uart3_Printf
 
 /* USER CODE END Includes */
@@ -206,22 +208,24 @@ int main(void)
     		  servo_flag = 0;      // 플래그 초기화
     		  }
       }
+  	uint16_t moisture = SoilVal_Avg();
+  	// Water On
+  	// moisture Percentage 10% down
+  	if(moisture <= 10)
+  	{
+  		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
+  		HAL_Delay(500);
+  	}
+  		// Another Case
+  	else{ }
+
+  	printf("Moisture : %d%%\r\n",moisture);
+
+
+
 	  show_next_page();
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
-	uint16_t moisture = SoilVal_Avg();
-	// Water On
-	// moisture Percentage 10% down
-	if(moisture <= 10)
-	{
-		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
-		HAL_Delay(500);
-	}
-		// Another Case
-	else{ }
-
-	printf("Moisture : %d%%\r\n",moisture);
-	HAL_Delay(1000);
 
     /* USER CODE BEGIN 3 */
   }
@@ -483,13 +487,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3|Warm_Hum_Pin|FAN_Moter_Pin|HeatingPad_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, Water_MOT_Pin|Warm_Hum_Pin|FAN_Moter_Pin|HeatingPad_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PD3 FAN_Moter_Pin HeatingPad_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|FAN_Moter_Pin|HeatingPad_Pin;
+  /*Configure GPIO pins : Water_MOT_Pin FAN_Moter_Pin HeatingPad_Pin */
+  GPIO_InitStruct.Pin = Water_MOT_Pin|FAN_Moter_Pin|HeatingPad_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
