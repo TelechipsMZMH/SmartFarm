@@ -11,7 +11,7 @@
 #include "main.h"
 
 /* Temperature thresholds */
-#define TEMP_HIGH_THRESHOLD  30.0f  // 팬 작동 온도 (섭씨)
+#define TEMP_HIGH_THRESHOLD  26.0f  // 팬 작동 온도 (섭씨)
 #define TEMP_LOW_THRESHOLD   10.0f  // 발열패드 작동 온도 (섭씨)
 
 /* Function prototypes */
