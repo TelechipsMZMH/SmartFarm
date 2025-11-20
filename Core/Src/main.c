@@ -14,6 +14,12 @@
 #include "warm_hum.h"
 #include "temp_control.h"
 #include <stdarg.h>
+#include <stdio.h>
+#include <stdarg.h>
+#include "soil_hum.h"
+
+#define printf Uart3_Printf
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -33,6 +39,7 @@
 
 /* Private variables ---------------------------------------------------------*/
 ADC_HandleTypeDef hadc1;
+ADC_HandleTypeDef hadc2;
 
 I2C_HandleTypeDef hi2c2;
 
@@ -53,6 +60,7 @@ static void MX_ADC1_Init(void);
 static void MX_TIM3_Init(void);
 static void MX_USART3_UART_Init(void);
 static void MX_I2C2_Init(void);
+static void MX_ADC2_Init(void);
 /* USER CODE BEGIN PFP */
 #define THRESHOLD 2000  // 조도 임계값
 #define SERVO_0_DEG    500   // 0도 (0.5ms)
@@ -137,6 +145,7 @@ int main(void)
   MX_TIM3_Init();
   MX_USART3_UART_Init();
   MX_I2C2_Init();
+  MX_ADC2_Init();
   /* USER CODE BEGIN 2 */
   HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
   Servo_SetAngle(90);  // 초기 위치 0도로 설정
@@ -202,6 +211,21 @@ int main(void)
     		  servo_flag = 0;      // 플래그 초기화
     		  }
       }
+  	uint16_t moisture = SoilVal_Avg();
+  	// Water On
+  	// moisture Percentage 10% down
+  	if(moisture <= 10)
+  	{
+  		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
+  		HAL_Delay(500);
+  	}
+  		// Another Case
+  	else{ }
+
+  	printf("Moisture : %d%%\r\n",moisture);
+
+
+
 	  show_next_page();
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
@@ -301,6 +325,58 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
+
+}
+
+/**
+  * @brief ADC2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_ADC2_Init(void)
+{
+
+  /* USER CODE BEGIN ADC2_Init 0 */
+
+  /* USER CODE END ADC2_Init 0 */
+
+  ADC_ChannelConfTypeDef sConfig = {0};
+
+  /* USER CODE BEGIN ADC2_Init 1 */
+
+  /* USER CODE END ADC2_Init 1 */
+
+  /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
+  */
+  hadc2.Instance = ADC2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc2.Init.Resolution = ADC_RESOLUTION_12B;
+  hadc2.Init.ScanConvMode = DISABLE;
+  hadc2.Init.ContinuousConvMode = DISABLE;
+  hadc2.Init.DiscontinuousConvMode = DISABLE;
+  hadc2.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_NONE;
+  hadc2.Init.ExternalTrigConv = ADC_SOFTWARE_START;
+  hadc2.Init.DataAlign = ADC_DATAALIGN_RIGHT;
+  hadc2.Init.NbrOfConversion = 1;
+  hadc2.Init.DMAContinuousRequests = DISABLE;
+  hadc2.Init.EOCSelection = ADC_EOC_SINGLE_CONV;
+  if (HAL_ADC_Init(&hadc2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
+  */
+  sConfig.Channel = ADC_CHANNEL_6;
+  sConfig.Rank = 1;
+  sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
+  if (HAL_ADC_ConfigChannel(&hadc2, &sConfig) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN ADC2_Init 2 */
+
+  /* USER CODE END ADC2_Init 2 */
 
 }
 
@@ -466,13 +542,13 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOD, GPIO_PIN_3|Warm_Hum_Pin|FAN_Moter_Pin|HeatingPad_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOD, Water_MOT_Pin|Warm_Hum_Pin|FAN_Moter_Pin|HeatingPad_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PD3 FAN_Moter_Pin HeatingPad_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|FAN_Moter_Pin|HeatingPad_Pin;
+  /*Configure GPIO pins : Water_MOT_Pin FAN_Moter_Pin HeatingPad_Pin */
+  GPIO_InitStruct.Pin = Water_MOT_Pin|FAN_Moter_Pin|HeatingPad_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
