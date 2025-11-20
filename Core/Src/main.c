@@ -49,8 +49,6 @@ TIM_HandleTypeDef htim3;
 UART_HandleTypeDef huart3;
 
 /* USER CODE BEGIN PV */
-float temperature = 0;
-float humidity = 0;
 uint8_t msg[200];
 /* USER CODE END PV */
 
@@ -169,19 +167,9 @@ int main(void)
 
   while (1)
   {
-    // DHT11 센서로부터 데이터 읽기
-    read_result = DHT11_Read_Data(&temperature, &humidity);
+	  TempControl_ReadAndUpdate();
+//    HAL_Delay(3000);  // 3초마다 측정
 
-    if (read_result)
-    {
-      TempControl_Update(temperature);
-      Uart3_Printf("%f\n", temperature);
-    }
-    else
-    {
-    }
-
-    HAL_Delay(3000);  // 3초마다 측정
       // ADC 조도센서 읽기
       HAL_ADC_Start(&hadc1);
       HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
