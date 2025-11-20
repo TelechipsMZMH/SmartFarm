@@ -41,6 +41,7 @@
 ADC_HandleTypeDef hadc1;
 ADC_HandleTypeDef hadc2;
 
+I2C_HandleTypeDef hi2c1;
 I2C_HandleTypeDef hi2c2;
 
 TIM_HandleTypeDef htim3;
@@ -159,6 +160,7 @@ int main(void)
   DHT11_Init();
   TempControl_Init();
   init_display(&hi2c2);
+  Soil_Start();
 
   /* USER CODE END 2 */
 
@@ -214,6 +216,21 @@ int main(void)
     		  servo_flag = 0;      // 플래그 초기화
     		  }
       }
+
+    	uint16_t moisture = SoilVal_Avg();
+    	set_soil_moisture(moisture / 10);
+    	// Water On
+    	// moisture Percentage 10% down
+    	if(moisture <= 10)
+    	{
+    		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
+    		HAL_Delay(500);
+    	}
+    		// Another Case
+    	else{ }
+
+    	printf("Moisture : %d%%\r\n",moisture);
+
 	  show_next_page();
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
@@ -342,7 +359,7 @@ static void MX_ADC2_Init(void)
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
   */
   hadc2.Instance = ADC2;
-  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
+  hadc2.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV4;
   hadc2.Init.Resolution = ADC_RESOLUTION_12B;
   hadc2.Init.ScanConvMode = DISABLE;
   hadc2.Init.ContinuousConvMode = DISABLE;
