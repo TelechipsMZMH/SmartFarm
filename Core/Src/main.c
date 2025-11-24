@@ -17,6 +17,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "soil_hum.h"
+#include "uart_it_motor.h"
+#include "bright.h"
 
 #define printf Uart3_Printf
 
@@ -62,16 +64,8 @@ static void MX_I2C2_Init(void);
 static void MX_ADC2_Init(void);
 static void MX_I2C1_Init(void);
 /* USER CODE BEGIN PFP */
-#define THRESHOLD 2000  // 조도 임계값
-#define SERVO_0_DEG    500   // 0도 (0.5ms)
-#define SERVO_90_DEG   1500  // 90도 (1.5ms)
-#define SERVO_180_DEG  2500  // 180도 (2.5ms)
 
-uint32_t adc_value = 0;
-float voltage = 0;
-uint8_t rx_data;
-volatile uint8_t servo_flag = 0;
-volatile uint32_t servo_start_time = 0;
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -103,12 +97,6 @@ void Uart3_Printf(char *fmt,...)
 	vsprintf(string,fmt,ap);
 	va_end(ap);
 	Uart3_Send_String(string);
-}
-void Servo_SetAngle(uint16_t angle)
-{
-    // PWM 펄스로 변환
-    uint16_t pulse = SERVO_0_DEG + (angle * (SERVO_180_DEG - SERVO_0_DEG) / 180);
-    __HAL_TIM_SET_COMPARE(&htim3, TIM_CHANNEL_3, pulse);
 }
 /* USER CODE END 0 */
 
@@ -148,11 +136,6 @@ int main(void)
   MX_ADC2_Init();
   MX_I2C1_Init();
   /* USER CODE BEGIN 2 */
-  HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-  Servo_SetAngle(90);  // 초기 위치 0도로 설정
-
-  // UART 인터럽트 수신 시작
-  HAL_UART_Receive_IT(&huart3, &rx_data, 1);
 
   // 모듈 초기화
   DHT11_Init();
@@ -160,6 +143,7 @@ int main(void)
   Soil_Init(&hadc2);
   init_display(&hi2c2);
   Soil_Start();
+  Motor_Init();
 
   /* USER CODE END 2 */
 
@@ -171,40 +155,12 @@ int main(void)
 	  TempControl_ReadAndUpdate();
 //    HAL_Delay(3000);  // 3초마다 측정
 
-      // ADC 조도센서 읽기
-      HAL_ADC_Start(&hadc1);
-      HAL_ADC_PollForConversion(&hadc1, HAL_MAX_DELAY);
-      adc_value = HAL_ADC_GetValue(&hadc1);
-      voltage = (adc_value / 4095.0f) * 3.3f;
-      Uart3_Printf("bright: %d\n", adc_value);
+      // 조도 LED 제어
+      Bright_Control();
 
-      // 조도에 따른 LED 제어
-      if(adc_value < THRESHOLD){
-          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 1);
-      }
-      else{
-          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_7, 0);
-      }
 
       // 서보모터 제어 (인터럽트 플래그 확인)
-      if(servo_flag == 1){
-          if(HAL_GetTick() - servo_start_time < 1000){
-              Servo_SetAngle(0);  // 90도 회전
-          }
-          else{
-              Servo_SetAngle(90);   // 정지
-              servo_flag = 0;      // 플래그 초기화
-          }
-      }
-      if(servo_flag == 2){
-    	  if(HAL_GetTick() - servo_start_time < 1000){
-    		  Servo_SetAngle(180);  // 90도 회전
-    		  }
-    	  else{
-    		  Servo_SetAngle(90);   // 정지
-    		  servo_flag = 0;      // 플래그 초기화
-    		  }
-      }
+      Motor_Control();
 
       // 토양 습도 측정값에 따른 펌프모터 액션
       Soil_Moisture_Action();

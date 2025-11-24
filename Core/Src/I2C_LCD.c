@@ -59,7 +59,6 @@ void lcd_send_cmd(uint8_t cmd)
     lcd_send_nibble(upper_nibble);  // 상위 4bit
     lcd_send_nibble(lower_nibble);  // 하위 4bit
 }
-s
 /* 데이터 전송 (RS=1) */
 void lcd_send_data(uint8_t data)
 {
