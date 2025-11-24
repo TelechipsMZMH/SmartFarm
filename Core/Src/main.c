@@ -565,7 +565,26 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart->Instance == USART3)
+    {
+        if(rx_data == 'q' || rx_data == 'Q')
+        {
+            servo_flag = 1;  // ì„œë³´ëª¨í„° ë™ìž‘ í”Œëž˜ê·¸ ì„¤ì •
+            servo_start_time = HAL_GetTick();  // ì‹œìž‘ ì‹œê°„ ê¸°ë¡
+            Uart3_Printf("Servo rotate\n");
+        }
+        if(rx_data == 'r' || rx_data == 'R')
+        {
+             servo_flag = 2;  // ì„œë³´ëª¨í„° ë™ìž‘ í”Œëž˜ê·¸ ì„¤ì •
+             servo_start_time = HAL_GetTick();  // ì‹œìž‘ ì‹œê°„ ê¸°ë¡
+             Uart3_Printf("Servo rotate\n");
+        }
+        // ë‹¤ìŒ ìˆ˜ì‹ ì„ ìœ„í•´ ì¸í„°ëŸ½íŠ¸ ìž¬ì‹œìž‘
+        HAL_UART_Receive_IT(&huart3, &rx_data, 1);
+    }
+}
 /* USER CODE END 4 */
 
 /**
