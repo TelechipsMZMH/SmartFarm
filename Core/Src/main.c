@@ -159,6 +159,7 @@ int main(void)
   // 모듈 초기화
   DHT11_Init();
   TempControl_Init();
+  Soil_Init(&hadc2);
   init_display(&hi2c2);
   Soil_Start();
 
@@ -217,19 +218,8 @@ int main(void)
     		  }
       }
 
-    	uint16_t moisture = SoilVal_Avg();
-    	set_soil_moisture(moisture / 10);
-    	// Water On
-    	// moisture Percentage 10% down
-    	if(moisture <= 10)
-    	{
-    		HAL_GPIO_TogglePin(GPIOD, GPIO_PIN_3);
-    		HAL_Delay(500);
-    	}
-    		// Another Case
-    	else{ }
-
-    	printf("Moisture : %d%%\r\n",moisture);
+      // 토양 습도 측정값에 따른 펌프모터 액션
+      Soil_Moisture_Action();
 
 	  show_next_page();
 	  HAL_Delay(1000);
