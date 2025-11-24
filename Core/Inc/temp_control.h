@@ -21,5 +21,6 @@ void TempControl_FanOn(void);
 void TempControl_FanOff(void);
 void TempControl_HeaterOn(void);
 void TempControl_HeaterOff(void);
+uint8_t TempControl_ReadAndUpdate(void);
 
 #endif /* __TEMP_CONTROL_H */

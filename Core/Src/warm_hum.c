@@ -171,3 +171,30 @@ uint8_t DHT11_Read_Data(float *temp, float *humi)
     return 0;  // 응답 없음
   }
 }
+
+/**
+  * @brief  온습도 센서 읽기 및 온도 제어 통합 함수
+  * @param  None
+  * @retval 1: 성공, 0: 실패
+  */
+uint8_t TempControl_ReadAndUpdate(void)
+{
+  float temperature = 0;
+  float humidity = 0;
+  uint8_t read_result;
+
+  // DHT11 센서로부터 데이터 읽기
+  read_result = DHT11_Read_Data(&temperature, &humidity);
+
+  if (read_result)
+  {
+    // 온도 제어 업데이트
+    TempControl_Update(temperature);
+    Uart3_Printf("%f\n", temperature);
+    return 1;  // 성공
+  }
+  else
+  {
+    return 0;  // 실패
+  }
+}
