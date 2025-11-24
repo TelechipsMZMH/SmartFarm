@@ -156,8 +156,8 @@ uint8_t DHT11_Read_Data(float *temp, float *humi)
       *temp = (float)TCI + (float)TCD / 10.0;
       *humi = (float)RHI + (float)RHD / 10.0;
 
-		set_display_temp(TCI, TCD);
-		set_display_humid(RHI, RHD);
+		DP_set_temp(TCI, TCD);
+		DP_set_humid(RHI, RHD);
 
       return 1;  // 성공
     }

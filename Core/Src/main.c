@@ -206,7 +206,7 @@ int main(void)
       }
 
     	uint16_t moisture = SoilVal_Avg();
-    	set_soil_moisture(moisture / 10);
+    	DP_set_soil_moisture(moisture / 10);
     	// Water On
     	// moisture Percentage 10% down
     	if(moisture <= 10)
@@ -219,7 +219,7 @@ int main(void)
 
     	printf("Moisture : %d%%\r\n",moisture);
 
-	  show_next_page();
+	  DP_show_next_page();
 	  HAL_Delay(1000);
     /* USER CODE END WHILE */
 

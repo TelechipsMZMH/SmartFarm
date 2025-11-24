@@ -37,51 +37,51 @@ void init_display(I2C_HandleTypeDef *hi2c)
 
 	HAL_Delay(100);
 	lcd_init(hi2c);
-	lcd_backlight(1);
+	LCD_backlight(1);
 
-	lcd_create_char(1, empty_box);
-	lcd_create_char(2, black_box);
+	LCD_create_char(1, empty_box);
+	LCD_create_char(2, black_box);
 }
 
-void set_display_temp(uint8_t temp_int, uint8_t temp_dec)
+void DP_set_temp(uint8_t temp_int, uint8_t temp_dec)
 {
 	info.temp_integer = temp_int;
 	info.temp_decimal = temp_dec;
 }
 
-void set_display_humid(uint8_t humid_int, uint8_t humid_dec)
+void DP_set_humid(uint8_t humid_int, uint8_t humid_dec)
 {
 	info.humid_integer = humid_int;
 	info.humid_decimal = humid_dec;
 }
 
-void set_soil_moisture(uint8_t soil_moist)
+void DP_set_soil_moisture(uint8_t soil_moist)
 {
 	info.soil_moisture = soil_moist;
 }
 
-void set_heat_state(bool state)
+void DP_set_heat_state(bool state)
 {
 	info.is_heat_on = state;
 }
 
-void set_fan_state(bool state)
+void DP_set_fan_state(bool state)
 {
 	info.is_fan_on = state;
 }
 
-void set_light_state(bool state)
+void DP_set_light_state(bool state)
 {
 	info.is_light_on = state;
 }
 
-void show_next_page()
+void DP_show_next_page()
 {
 	info.page_no = (info.page_no + 1) % PAGE_NUMBER;
-	show_display();
+	DP_show_display();
 }
 
-void show_display()
+void DP_show_display()
 {
 	switch(info.page_no) {
 	case Display_Page_No_0:
@@ -113,7 +113,7 @@ void show_display()
 
 	lcd_clear();
 	lcd_set_cursor(0, 0);  // 1번째 줄, 첫 번째 칸
-	lcd_print(display_message[0]);
+	LCD_print(display_message[0]);
 	lcd_set_cursor(0, 1);  // 2번째 줄, 첫 번째 칸
-	lcd_print(display_message[1]);
+	LCD_print(display_message[1]);
 }

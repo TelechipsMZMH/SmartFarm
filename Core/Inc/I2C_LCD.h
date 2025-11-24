@@ -46,13 +46,13 @@
 #define Rs 0x01  // Register select bit
 
 /* 함수 프로토타입 */
-void lcd_init(I2C_HandleTypeDef *hi2c);
-void lcd_clear(void);
-void lcd_set_cursor(uint8_t col, uint8_t row);
-void lcd_print(char *str);
-void lcd_backlight(uint8_t state);
-void lcd_create_char(uint8_t location, uint8_t charmap[8]);
-void lcd_write_custom_char(uint8_t location);
+void LCD_init(I2C_HandleTypeDef *hi2c);
+void LCD_clear(void);
+void LCD_set_cursor(uint8_t col, uint8_t row);
+void LCD_print(uint8_t *str);
+void LCD_backlight(uint8_t state);
+void LCD_create_char(uint8_t location, uint8_t charmap[8]);
+void LCD_write_custom_char(uint8_t location);
 
 
 #endif /* I2C_LCD_H_ */

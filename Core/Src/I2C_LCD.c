@@ -7,7 +7,7 @@ static uint8_t backlight_state = LCD_BACKLIGHT;
 /* i2c_lcd.c */
 
 /* 커스텀 문자 생성 함수 */
-void lcd_create_char(uint8_t location, uint8_t charmap[8])
+void LCD_create_char(uint8_t location, uint8_t charmap[8])
 {
     location &= 0x07;  // 0~7만 가능
 
@@ -25,7 +25,7 @@ void lcd_create_char(uint8_t location, uint8_t charmap[8])
 }
 
 /* 커스텀 문자 출력 */
-void lcd_write_custom_char(uint8_t location)
+void LCD_write_custom_char(uint8_t location)
 {
     lcd_send_data(location & 0x07);
 }
@@ -125,7 +125,7 @@ void lcd_set_cursor(uint8_t col, uint8_t row)
 }
 
 /* 문자열 출력 */
-void lcd_print(char *str)
+void LCD_print(char *str)
 {
     while(*str) {
         lcd_send_data(*str++);
@@ -133,7 +133,7 @@ void lcd_print(char *str)
 }
 
 /* 백라이트 제어 */
-void lcd_backlight(uint8_t state)
+void LCD_backlight(uint8_t state)
 {
     if(state) {
         backlight_state = LCD_BACKLIGHT;
