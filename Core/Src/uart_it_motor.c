@@ -30,21 +30,44 @@ void Motor_Control(void)
 {
     // 서보모터 제어 (인터럽트 플래그 확인)
     if(servo_flag == 1){
-        if(HAL_GetTick() - servo_start_time < 1000){
-            Servo_SetAngle(0);  // 0도 회전
-        }
-        else{
-            Servo_SetAngle(90);   // 정지
-            servo_flag = 0;      // 플래그 초기화
-        }
+//        if(HAL_GetTick() - servo_start_time < 1000){
+//            Servo_SetAngle(0);  // 0도 회전
+//        }
+//        else{
+//            Servo_SetAngle(90);   // 정지
+//            servo_flag = 0;      // 플래그 초기화
+//        }
+    	Servo_SetAngle(0);    // Q 입력 → 반시계 90° (0도)
+        servo_flag = 0;
     }
-    if(servo_flag == 2){
-        if(HAL_GetTick() - servo_start_time < 1000){
-            Servo_SetAngle(180);  // 180도 회전
+    else if(servo_flag == 2){
+//        if(HAL_GetTick() - servo_start_time < 1000){
+//            Servo_SetAngle(180);  // 180도 회전
+//        }
+//        else{
+//            Servo_SetAngle(90);   // 정지
+//            servo_flag = 0;      // 플래그 초기화
+//        }
+    	Servo_SetAngle(180);  // R 입력 → 시계 90° (180도)
+        servo_flag = 0;
+    }
+}
+
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
+{
+    if(huart->Instance == USART3)
+    {
+        if(rx_data == 'q' || rx_data == 'Q')
+        {
+            servo_flag = 1;
+            Uart3_Printf("Servo rotate\n");
         }
-        else{
-            Servo_SetAngle(90);   // 정지
-            servo_flag = 0;      // 플래그 초기화
+        if(rx_data == 'r' || rx_data == 'R')
+        {
+             servo_flag = 2;
+             Uart3_Printf("Servo rotate\n");
         }
+        Motor_Control();
+        HAL_UART_Receive_IT(&huart3, &rx_data, 1);
     }
 }

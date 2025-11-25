@@ -72,12 +72,14 @@ void DHT11_Init(void)
   */
 void DHT11_Start(void)
 {
+  __NVIC_DisableIRQ(USART3_IRQn);
   Set_Pin_Output();
   HAL_GPIO_WritePin(Warm_Hum_GPIO_Port, Warm_Hum_Pin, GPIO_PIN_RESET);  // Low
   HAL_Delay(18);  // 최소 18ms
   HAL_GPIO_WritePin(Warm_Hum_GPIO_Port, Warm_Hum_Pin, GPIO_PIN_SET);    // High
   delay_us(30);   // 20-40us 대기
   Set_Pin_Input();
+  __NVIC_EnableIRQ(USART3_IRQn);
 }
 
 /**

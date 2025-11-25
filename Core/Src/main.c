@@ -31,6 +31,11 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+// 시간 간격 offset : 0.01초
+#define TEMP_CONTROL_PERIOD 	30
+#define BRIGHT_CONTROL_PERIOD	50
+#define SOIL_MOISTURE_PERIOD	50
+#define DISPLAY_PERIOD			100
 
 /* USER CODE END PD */
 
@@ -49,6 +54,8 @@ I2C_HandleTypeDef hi2c2;
 TIM_HandleTypeDef htim3;
 
 UART_HandleTypeDef huart3;
+
+extern volatile uint8_t servo_flag;
 
 /* USER CODE BEGIN PV */
 uint8_t msg[200];
@@ -109,6 +116,7 @@ int main(void)
 
   /* USER CODE BEGIN 1 */
   uint8_t read_result;
+  uint32_t time_counter;
   /* USER CODE END 1 */
 
   /* MCU Configuration--------------------------------------------------------*/
@@ -145,6 +153,8 @@ int main(void)
   Soil_Start();
   Motor_Init();
 
+  time_counter = 0;
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -152,21 +162,28 @@ int main(void)
 
   while (1)
   {
-	  TempControl_ReadAndUpdate();
-//    HAL_Delay(3000);  // 3초마다 측정
+	  if(time_counter % DISPLAY_PERIOD == 0) {
+		  DP_show_next_page();
+	  }
+
+	  if(time_counter % TEMP_CONTROL_PERIOD == 0) {
+		  TempControl_ReadAndUpdate();
+	  }
 
       // 조도 LED 제어
-      Bright_Control();
+	  if(time_counter % BRIGHT_CONTROL_PERIOD == 0) {
+		  Bright_Control();
+	  }
 
-
-      // 서보모터 제어 (인터럽트 플래그 확인)
-      Motor_Control();
 
       // 토양 습도 측정값에 따른 펌프모터 액션
-      Soil_Moisture_Action();
+	  if(time_counter % SOIL_MOISTURE_PERIOD == 0) {
+		  Soil_Moisture_Action();
+	  }
 
-	  DP_show_next_page();
-	  HAL_Delay(1000);
+	  time_counter++;
+	  HAL_Delay(10);
+
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -441,7 +458,7 @@ static void MX_TIM3_Init(void)
 
   /* USER CODE END TIM3_Init 1 */
   htim3.Instance = TIM3;
-  htim3.Init.Prescaler = 16-1;
+  htim3.Init.Prescaler = 84-1;
   htim3.Init.CounterMode = TIM_COUNTERMODE_UP;
   htim3.Init.Period = 20000-1;
   htim3.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
@@ -565,26 +582,7 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
-{
-    if(huart->Instance == USART3)
-    {
-        if(rx_data == 'q' || rx_data == 'Q')
-        {
-            servo_flag = 1;  // ì„œë³´ëª¨í„° ë™ìž‘ í”Œëž˜ê·¸ ì„¤ì •
-            servo_start_time = HAL_GetTick();  // ì‹œìž‘ ì‹œê°„ ê¸°ë¡
-            Uart3_Printf("Servo rotate\n");
-        }
-        if(rx_data == 'r' || rx_data == 'R')
-        {
-             servo_flag = 2;  // ì„œë³´ëª¨í„° ë™ìž‘ í”Œëž˜ê·¸ ì„¤ì •
-             servo_start_time = HAL_GetTick();  // ì‹œìž‘ ì‹œê°„ ê¸°ë¡
-             Uart3_Printf("Servo rotate\n");
-        }
-        // ë‹¤ìŒ ìˆ˜ì‹ ì„ ìœ„í•´ ì¸í„°ëŸ½íŠ¸ ìž¬ì‹œìž‘
-        HAL_UART_Receive_IT(&huart3, &rx_data, 1);
-    }
-}
+
 /* USER CODE END 4 */
 
 /**
